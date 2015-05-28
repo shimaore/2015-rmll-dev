@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1024" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>CCNQ(4) | Stéphane Alnet</title>
+
+    <meta name="description" content="CCNQ(4) is a SIP softswitch for small(ish) ISPs." />
+    <meta name="author" content="Stéphane Alnet" />
+
+    <link rel="shortcut icon" href="favicon.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+    <!-- reveal -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <link rel="stylesheet" href="reveal.js/css/reveal.css" />
+    <link rel="stylesheet" href="reveal.js/css/theme/beige.css" id="theme" />
+    <link rel="stylesheet" href="reveal.js/lib/css/zenburn.css" />
+
+    <link rel="stylesheet" href="prezo.css" />
+</head>
+
+<body class="impress-not-supported">
+
+<div class="reveal">
+  <div id="impress" class="slides">
+    <section id="start" class="step slide" data-x="-1000" data-y="-1500">
+      <h1>CCNQ(4)</h1>
+      <p>Stéphane Alnet</p>
+    </section>
+
+    <section class="step slide" data-x="0" data-y="-1500">
+      <p>CCNQ was <strong>born in 2006</strong>.</p>
+      <p>That's 9 years ago.</p>
+    </section>
+
+    <section class="step slide" data-x="1000" data-y="-1500">
+      <q>What happened during these 9 years?</q>
+    </section>
+
+    <section>
+    <section id="title" class="step slide" data-x="0" data-y="0" data-scale="4">
+      <span class="try">Let's go</span>
+      <h1>Historical</h1>
+    </section>
+
+    <section id="v0.x" class="step slide" data-x="850" data-y="-6000" data-rotate="90" data-scale="5">
+      <h2>v0.x (2006): ssh push (think ansible)</h2>
+      <ul>
+        <li>System and customer configuration in a single document.</li>
+        <li>Only ok when you're doing a couple changes a day.</li>
+        <li>Code was lost in the Carribeans.</li>
+      </ul>
+    </section>
+
+    <section id="v1.5" class="step slide" data-x="-3150" data-y="-6000" data-rotate="90" data-scale="5">
+      <h2>v1.5 (2007): Perl (sync), CouchDB?</h2>
+      <ul>
+        <li>Barely better</li>
+        <li>Code also thankfully lost.</li>
+      </ul>
+    </section>
+
+    <section id="v2.0" class="step slide" data-x="-6150" data-y="-6000" data-rotate="90" data-scale="5">
+      <h2>v2.0 (2009): Perl async, CouchDB</h2>
+      <ul>
+        <li>CouchDB on each call-processing server</li>
+        <li>Perl async for realtime change management</li>
+        <li>Task management via CouchDB</li>
+        <li>Everything: provisioning, rating, UI, ...</li>
+        <li>Perl <em>packages</em></li>
+      </ul>
+    </section>
+
+    <section class="step slide" data-x="-6150" data-y="-7800" data-rotate="0" data-scale="0.2">
+      <p>Doing async in Perl is <strong>hard</strong>.</p>
+    </section>
+
+    <section id="v3" class="step slide" data-x="-10150" data-y="-6000" data-rotate="90" data-scale="5">
+      <h2>v3 (2010): Node.js, CouchDB, RabbitMQ</h2>
+      <ul>
+        <li>Focus on deployable call-processing</li>
+        <li>Node.js for async</li>
+        <li>Debian packages</li>
+        <li>AMQP for M2M</li>
+        <li>Host configurations in CouchDB</li>
+      </ul>
+    </section>
+
+    <section class="step slide" data-x="-10150" data-y="-7800" data-rotate="90" data-scale="0.2">
+      <p>Debian packages are <strong>hard</strong>.</p>
+      <p>AMQP is verbose.</p>
+    </section>
+
+    <section id="v4" class="step slide" data-x="-13150" data-y="-6000" data-rotate="90" data-scale="5">
+      <h2>v4 (2014): Docker.io, Node.js, CouchDB, Socket.IO</h2>
+      <ul>
+        <li>Docker.io: one app, one container</li>
+        <li>Apps built out of <span class="tiny">tiny</span> components.</li>
+        <li><code>npm</code> for (<strong>strong</strong>) dependency management</li>
+        <li><code>Socket.io</code> for M2M &amp; UI</li>
+        <li>Host configurations in git(lab)</li>
+      </ul>
+    </section>
+    </section>
+
+
+    <section id="overview" class="step slide" data-x="3000" data-y="1500" data-scale="10">
+    </section>
+
+  </div>
+</div>
+<script src="impress.js/js/impress.js"></script>
+<script> // impress().init();</script>
+<script src="reveal.js/lib/js/head.min.js"></script>
+<script src="reveal.js/js/reveal.js"></script>
+<script>
+if(true){
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+
+    transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+    dependencies: [
+      { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'reveal.js/plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+      { src: 'reveal.js/plugin/notes/notes.js', async: true }
+    ]
+  });
+}
+</script>
+
+</body>
+</html>

@@ -49,6 +49,14 @@ h1 span.try {
     transform:         translateZ(20px);
 }
 
+span.tiny {
+    font-size: 20%;
+}
+
+span.small {
+    font-size: 50%;
+}
+
 .reveal li {
   padding-top: 0.2ex;
   padding-bottom: 0.2ex;

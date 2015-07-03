@@ -352,7 +352,7 @@ applies to `npm` and others, e.g. tshark in nifty-ground's Dockerfile
 </div>
 * Dependencies management: `npm`, `Dockerfile`; Gemnasium
 
-## Thank you / Merci
+## Thank you | Merci
 
 * **CCNQ** http://ccnq.shimaore.net/
 * **Code** https://github.com/shimaore/

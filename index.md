@@ -434,6 +434,7 @@ applies to `npm` and others, e.g. tshark in nifty-ground's Dockerfile
 
 ## Thank you | Merci
 
-* **CCNQ** http://ccnq.shimaore.net/
+* **CCNQ4** https://github.com/shimaore/ccnq4
 * **Code** https://github.com/shimaore/
+* **Presentation**: http://shimaore.github.io/2015-rmll-dev
 * **Contact** http://stephane.shimaore.net/

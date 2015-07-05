@@ -396,16 +396,17 @@ Compression (=keep only data that is still present) is a hotly debated topic.
 
 ## <span class="try">JSON Swiss Army Knife</span>JQ
 
-    rest -G \
-      -d startkey='\"rule:16171\"' \
-      -d endkey='\"rule:1617999\"' \
-      https://couchdb.example.net/ruleset/_all_docs | \
+```sh
+rest -G \
+  -d startkey='\"rule:16171\"' \
+  -d endkey='\"rule:1617999\"' \
+  https://couchdb.example.net/ruleset/_all_docs | \
 
-    jq '{docs: (.rows | map({ _id: .id, _rev: .value.rev, _deleted:true })) }'  \
+jq '{docs: (.rows | map({ _id: .id, _rev: .value.rev, _deleted:true })) }'  \
 
-    rest -X POST --data-binary @- \
-      https://couchdb.example.net/ruleset/_bulk_docs
-
+rest -X POST --data-binary @- \
+  https://couchdb.example.net/ruleset/_bulk_docs
+```
 <div class="notes">
 The command-line is alive and well!
 
@@ -435,4 +436,5 @@ applies to `npm` and others, e.g. tshark in nifty-ground's Dockerfile
 
 * **CCNQ** http://ccnq.shimaore.net/
 * **Code** https://github.com/shimaore/
+* **Presentation**: http://shimaore.github.io/2015-rmll-dev
 * **Contact** http://stephane.shimaore.net/

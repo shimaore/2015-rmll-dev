@@ -75,8 +75,8 @@
 <p>Doing async in Perl is <strong>hard</strong>.</p>
 <aside class="notes">
 <ul>
-<li>No unified model for callbacks</li>
-<li>Incompatibilities between modules</li>
+<li>No unified model for callbacks.</li>
+<li>Incompatibilities between modules sometimes create hard-to-resolve locking situations.</li>
 <li>Never was able to get a CouchDB/AMQP/FileSystem synchronization to work properly.</li>
 </ul>
 </aside>
@@ -91,7 +91,7 @@
 <li>CouchDB-based DNS</li>
 </ul>
 <aside class="notes">
-<p>Host configuration changes dynamically update.</p>
+<p>Host configuration changes are dynamically applied (e.g. FreeSwitch XML configuration files generated on the fly + <code>reloadxml</code>).</p>
 </aside>
 </section><section class="slide level2">
 
@@ -110,15 +110,15 @@
 <p>Host configurations in git(lab) really is a workaround. Ideally should move back to a database-centric approach to host provisioning. Lots of code to migrate from CCNQ3, still iterating.</p>
 </aside>
 </section></section>
-<section><section id="lets-talk-about-code" class="titleslide slide level1"><h1><span class="- try">Let's talk</span> About Code</h1></section><section id="guiding-principles" class="slide level2">
+<section><section id="lets-talk-about-code" class="titleslide slide level1"><h1><span class="try">Let's talk</span> About Code</h1></section><section id="guiding-principles" class="slide level2">
 <h1>Guiding Principles</h1>
 <ul>
-<li>Same modules on the server and the client: PouchDB, Socket.io-client, superagent, bluebird (Promises)</li>
 <li>APIs: REST/JSON and Socket.IO only
 <aside class="notes">
 No HTML generated on servers, use templating on the client.
 </aside></li>
 <li>Prefer <code>changes</code> over directives</li>
+<li>Same modules on the server and the client: PouchDB, Socket.io-client, superagent, bluebird (Promises)</li>
 </ul>
 </section><section id="promises" class="slide level2">
 <h1>Promises</h1>
@@ -149,8 +149,8 @@ No HTML generated on servers, use templating on the client.
 <aside class="notes">
 <p>Source: thinkable-ducks/config</p>
 </aside>
-</section><section id="fluency" class="slide level2">
-<h1>Fluency</h1>
+</section><section id="fluent" class="slide level2">
+<h1>Fluent</h1>
 <pre class="coffeescript"><code>SuperAgent
 .get &quot;#{@cfg.auth_base ? @cfg.proxy_base}/_session&quot;
 .accept 'json'
@@ -162,7 +162,7 @@ No HTML generated on servers, use templating on the client.
   @session.couchdb_token = hex_hmac_sha1 @cfg.couchdb_secret, @session.couchdb_username</code></pre>
 </div>
 <aside class="notes">
-<p>Source: spicy-action/couchdb-auth Uses package <code>superagent-as-promised</code> Illustrates combining fluency with Promises.</p>
+<p>Source: spicy-action/couchdb-auth Uses package <code>superagent-as-promised</code> Also illustrates combining fluent interfaces with Promises.</p>
 </aside>
 </section><section id="domain-specifc-languagesdsl" class="slide level2">
 <h1><span class="try">Domain-Specifc Languages</span>DSL</h1>
@@ -209,15 +209,10 @@ client.on 'trace', (doc) -&gt;
       in_reply_to: doc
       error: error</code></pre>
 <aside class="notes">
-<p>Source: project <code>nifty-ground</code>.</p>
+<p>Source: project <code>nifty-ground</code>. Note the trick with <code>Promise.resolve()</code> which allows to start the Promise chain whether function <code>trace</code> returns a Promise or not.</p>
 </aside>
 </section><section id="domain-specifc-languagesvoicemail" class="slide level2">
 <h1><span class="try">Domain-Specifc Languages</span>Voicemail</h1>
-<aside class="notes">
-<pre class="coffeescript"><code>class User
-  constructor: (@ctx,@id,@database,@db_uri) -&gt;
-    @db = new PouchDB @db_uri</code></pre>
-</aside>
 <pre class="coffeescript"><code>class User
 
   main_menu: -&gt;
@@ -235,14 +230,7 @@ client.on 'trace', (doc) -&gt;
         when &quot;3&quot;
           @config_menu()</code></pre>
 <aside class="notes">
-<pre><code>@include = (ctx) -&gt;
-  ctx.get_choice = (file) =&gt;
-    ctx.action 'play_and_get_digits', &quot;1 1 1 1000 # #{file} silence_stream://250 choice&quot;
-    .then ({body}) -&gt;
-      body.variable_choice</code></pre>
-</aside>
-<aside class="notes">
-<p>Souce: project <code>well-groomed-feast</code>.</p>
+<p>Souce: project <code>well-groomed-feast</code>, with some renaming to simplify.</p>
 </aside>
 </section></section>
 <section><section id="lets-talk-aboutfun" class="titleslide slide level1"><h1><span class="try">Let's talk about</span>Fun</h1></section><section id="esl-module" class="slide level2">
@@ -355,7 +343,7 @@ db.put _id:'shimaore', name:'Stéphane Alnet'
 <aside class="notes">
 <p>When mounting logs etc the UIDs are kept identical, often resulting in access issues.</p>
 </aside></li>
-<li><code>docker-ccnq</code> module (internal) to ensure proper start of containers.
+<li><code>docker-ccnq</code> module (private) to ensure proper start of containers.
 <aside class="notes">
 <p>Essentially git pull at install + <code>for dir in ~docker/start/[0-9]*; do cd $dir &amp;&amp; ./init start; done</code></p>
 </aside></li>
@@ -363,7 +351,48 @@ db.put _id:'shimaore', name:'Stéphane Alnet'
 <aside class="notes">
 <p>Docker.io uses large amounts of disk because the intermediary (build) steps of a Dockerfile are part of the final image. Compression (=keep only data that is still present) is a hotly debated topic.</p>
 </aside></li>
+<li>Avoid using <code>latest</code> tags.
+<aside class="notes">
+<p>Same as when dealing with dependencies without Semantic Versioning: you don't know what you are actually deploying when you deploy <code>latest</code>.</p>
+</aside></li>
 </ul>
+<aside class="notes">
+<p>Here's a typical deployment <code>init</code> script like the ones we currently use in production:</p>
+<pre class="sh"><code>#!/bin/bash
+CONFIG=/opt/thinkable-ducks/config.json
+REGISTRY=(redacted)
+VERSION=3.6.5
+REPO=shimaore/tough-rate:${VERSION}
+
+case &quot;$1&quot; in
+  pull)
+    docker pull &quot;${REGISTRY}/${REPO}&quot;
+    ;;
+
+  start)
+    { echo -n &quot;#### Start $DOCKER_NAME $REPO ####&quot;; date; git show; } &gt;&gt; $HOME/version.log
+    # Remove any lingering container.
+    docker rm ${DOCKER_NAME} || echo '(ignored)'
+    # Create log directory if it doesn't exist.
+    mkdir -p log
+    # Start the image.
+    docker run -d --net host \
+      --restart=always \
+      --name ${DOCKER_NAME} \
+      --env-file=./env \
+      -v ${PWD}/config.json:${CONFIG} -e CONFIG=${CONFIG} \
+      -v ${PWD}/log:/opt/tough-rate/log \
+      &quot;${REGISTRY}/${REPO}&quot;
+    ;;
+
+  stop)
+    { echo -n &quot;#### Stop $DOCKER_NAME $REPO ####&quot;; date; } &gt;&gt; $HOME/version.log
+    docker kill ${DOCKER_NAME} || echo '(ignored)'
+    docker rm   ${DOCKER_NAME} || echo '(ignored)'
+    true
+  ;;
+                                                                                                      esac</code></pre>
+</aside>
 </section><section id="json-swiss-army-knifejq" class="slide level2">
 <h1><span class="try">JSON Swiss Army Knife</span>JQ</h1>
 <pre class="sh"><code>rest -G \

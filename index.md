@@ -41,8 +41,8 @@ What happened during these 9 years?
 Doing async in Perl is <strong>hard</strong>.
 
 <div class="notes">
-- No unified model for callbacks
-- Incompatibilities between modules
+- No unified model for callbacks.
+- Incompatibilities between modules sometimes create hard-to-resolve locking situations.
 - Never was able to get a CouchDB/AMQP/FileSystem synchronization to work properly.
 </div>
 
@@ -56,7 +56,7 @@ Doing async in Perl is <strong>hard</strong>.
 * CouchDB-based DNS
 
 <div class="notes">
-Host configuration changes dynamically update.
+Host configuration changes are dynamically applied (e.g. FreeSwitch XML configuration files generated on the fly + `reloadxml`).
 </div>
 
 ----------
@@ -80,15 +80,15 @@ Ideally should move back to a database-centric approach to host provisioning.
 Lots of code to migrate from CCNQ3, still iterating.
 </div>
 
-# <span class="- try">Let's talk</span> About Code
+# <span class="try">Let's talk</span> About Code
 
 ## Guiding Principles
 
-* Same modules on the server and the client:
-  PouchDB, Socket.io-client, superagent, bluebird (Promises)
 * APIs: REST/JSON and Socket.IO only
 <div class="notes">No HTML generated on servers, use templating on the client.</div>
 * Prefer `changes` over directives
+* Same modules on the server and the client:
+  PouchDB, Socket.io-client, superagent, bluebird (Promises)
 
 ## Promises
 
@@ -135,7 +135,7 @@ Start FreeSwitch (if needed)
 Source: thinkable-ducks/config
 </div>
 
-## Fluency
+## Fluent
 
 ```coffeescript
 SuperAgent
@@ -143,6 +143,7 @@ SuperAgent
 .accept 'json'
 .auth user.name, user.pass
 ```
+
 <div class="fragment">
 ```coffeescript
 .then ({body}) =>
@@ -154,7 +155,7 @@ SuperAgent
 <div class="notes">
 Source: spicy-action/couchdb-auth
 Uses package `superagent-as-promised`
-Illustrates combining fluency with Promises.
+Also illustrates combining fluent interfaces with Promises.
 </div>
 
 ## <span class="try">Domain-Specifc Languages</span>DSL
@@ -214,17 +215,10 @@ client.on 'trace', (doc) ->
 ```
 <div class="notes">
 Source: project `nifty-ground`.
+Note the trick with `Promise.resolve()` which allows to start the Promise chain whether function `trace` returns a Promise or not.
 </div>
 
 ## <span class="try">Domain-Specifc Languages</span>Voicemail
-
-<div class="notes">
-```coffeescript
-class User
-  constructor: (@ctx,@id,@database,@db_uri) ->
-    @db = new PouchDB @db_uri
-```
-</div>
 
 ```coffeescript
 class User
@@ -246,16 +240,7 @@ class User
 ```
 
 <div class="notes">
-```
-@include = (ctx) ->
-  ctx.get_choice = (file) =>
-    ctx.action 'play_and_get_digits', "1 1 1 1000 # #{file} silence_stream://250 choice"
-    .then ({body}) ->
-      body.variable_choice
-```
-</div>
-<div class="notes">
-Souce: project `well-groomed-feast`.
+Souce: project `well-groomed-feast`, with some renaming to simplify.
 </div>
 
 # <span class="try">Let's talk about</span>Fun
@@ -383,7 +368,7 @@ Use mountpoint for logs, live data.
 <div class="notes">
 When mounting logs etc the UIDs are kept identical, often resulting in access issues.
 </div>
-- `docker-ccnq` module (internal) to ensure proper start of containers.
+- `docker-ccnq` module (private) to ensure proper start of containers.
 <div class="notes">
 Essentially git pull at install + `for dir in ~docker/start/[0-9]*; do cd $dir && ./init start; done`
 </div>
@@ -392,7 +377,51 @@ Essentially git pull at install + `for dir in ~docker/start/[0-9]*; do cd $dir &
 Docker.io uses large amounts of disk because the intermediary (build) steps of a Dockerfile are part of the final image.
 Compression (=keep only data that is still present) is a hotly debated topic.
 </div>
+- Avoid using `latest` tags.
+<div class="notes">
+Same as when dealing with dependencies without Semantic Versioning: you don't know what you are actually deploying when you deploy `latest`.
+</div>
 
+<div class="notes">
+Here's a typical deployment `init` script like the ones we currently use in production:
+
+```sh
+#!/bin/bash
+CONFIG=/opt/thinkable-ducks/config.json
+REGISTRY=(redacted)
+VERSION=3.6.5
+REPO=shimaore/tough-rate:${VERSION}
+
+case "$1" in
+  pull)
+    docker pull "${REGISTRY}/${REPO}"
+    ;;
+
+  start)
+    { echo -n "#### Start $DOCKER_NAME $REPO ####"; date; git show; } >> $HOME/version.log
+    # Remove any lingering container.
+    docker rm ${DOCKER_NAME} || echo '(ignored)'
+    # Create log directory if it doesn't exist.
+    mkdir -p log
+    # Start the image.
+    docker run -d --net host \
+      --restart=always \
+      --name ${DOCKER_NAME} \
+      --env-file=./env \
+      -v ${PWD}/config.json:${CONFIG} -e CONFIG=${CONFIG} \
+      -v ${PWD}/log:/opt/tough-rate/log \
+      "${REGISTRY}/${REPO}"
+    ;;
+
+  stop)
+    { echo -n "#### Stop $DOCKER_NAME $REPO ####"; date; } >> $HOME/version.log
+    docker kill ${DOCKER_NAME} || echo '(ignored)'
+    docker rm   ${DOCKER_NAME} || echo '(ignored)'
+    true
+  ;;
+                                                                                                      esac
+```
+</div>
 
 ## <span class="try">JSON Swiss Army Knife</span>JQ
 

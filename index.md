@@ -95,15 +95,39 @@ Lots of code to migrate from CCNQ3, still iterating.
 <q>This isn't 2011 anymore.</q>
 
 ```coffeescript
-serialize cfg, 'config' # Load middlewares
-.then ->                # Write FreeSwitch XML configuration
+serialize cfg, 'config' 
+```
+<div class="notes">
+Configure using `config` middlewares.
+</div>
+
+```coffeescript
+.then ->
   unless cfg.server_only is true
     fs.writeFileAsync process.env.FSCONF, xml, 'utf-8'
-.then ->                # Start the call-handler service
+```
+<div class="notes">
+Write FreeSwitch XML configuration (if needed)
+</div>
+
+```coffeescript
+.then ->
   supervisor.startProcessAsync 'server'
-.then ->                # Start FreeSwitch
+```
+<div class="notes">
+Start the call-handler service
+</div>
+
+```coffeescript
+.then ->
   unless cfg.server_only is true
     supervisor.startProcessAsync 'freeswitch'
+```
+<div class="notes">
+Start FreeSwitch (if needed)
+</div>
+
+```coffeescript
 .then ->
   debug 'Done'
 ```
@@ -130,6 +154,7 @@ SuperAgent
 <div class="notes">
 Source: spicy-action/couchdb-auth
 Uses package `superagent-as-promised`
+Illustrates combining fluency with Promises.
 </div>
 
 ## <span class="try">Domain-Specifc Languages</span>DSL
@@ -187,6 +212,9 @@ client.on 'trace', (doc) ->
       in_reply_to: doc
       error: error
 ```
+<div class="notes">
+Source: project `nifty-ground`.
+</div>
 
 ## <span class="try">Domain-Specifc Languages</span>Voicemail
 
@@ -225,6 +253,9 @@ class User
     .then ({body}) ->
       body.variable_choice
 ```
+</div>
+<div class="notes">
+Souce: project `well-groomed-feast`.
 </div>
 
 # <span class="try">Let's talk about</span>Fun
@@ -288,6 +319,54 @@ Examples:
 - Store PCAP file (last 500 packets) in CouchDB
 
 # More Fun
+
+## PouchDB
+
+Browser:
+
+```coffeescript
+db = new PouchDB 'users'
+
+db.put _id:'shimaore', name:'Stéphane Alnet'
+.then ->
+  db.get 'shimaore'
+.then (doc) ->
+  assert doc.name is 'Stéphane Alnet'
+.catch (error) ->
+  cuddly.csr "Could not retrieve shimaore: #{error}"
+```
+<div class="notes">
+All accesses are local to the browser. Database is persisted.
+</div>
+
+-----------
+
+Browser: Access CouchDB
+
+```coffeescript
+db = new PouchDB 'https://couchdb.example.net:6984/users'
+```
+
+----------
+
+Sync Browser ←→ CouchDB
+
+```coffeescript
+PouchDB.sync 'users', 'https://couchdb.example.net:6984/users'
+```
+
+<div class="notes">
+Two-way replication. Also exist as one-way replication with `replicate`.
+Offline-first made easy. Also check out Hoodie.hq!
+</div>
+
+-----------
+
+Server: Use local database
+
+```coffeescript
+db = new PouchDB 'users'
+```
 
 ## Docker.io
 

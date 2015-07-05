@@ -64,3 +64,8 @@ span.small {
 
 .impress-enabled          { pointer-events: none }
 .impress-enabled #impress { pointer-events: auto }
+
+.reveal pre code {
+  background-color: white;
+  color: black;
+}
